@@ -7,14 +7,12 @@ import com.typesafe.scalalogging.Logger
 import org.apache.spark.graphx.lib.ShortestPaths
 import org.apache.spark.graphx.{Edge, Graph}
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{explode, split}
+import org.apache.spark.sql.functions.explode
 
 import scala.collection.mutable.ListBuffer
 import scala.math.BigInt
 
 case class DBLPEdge(srcId: Int, dstId: Int, attr: Long)
-
-//case class Vertex(name: String)
 
 case class DBLPEntry(val title: String, val authors: String, val year: BigInt) {
   def isValid = {
@@ -25,9 +23,7 @@ case class DBLPEntry(val title: String, val authors: String, val year: BigInt) {
 class Bruxa
 
 object Bruxa {
-  private val logger = Logger(classOf[Bruxa])
   private val conf = ConfigFactory.load()
-
   private val datafile = conf.getString("app.datafile")
 
   def main(args: Array[String]): Unit = {
@@ -37,16 +33,7 @@ object Bruxa {
       config("spark.app.id", "Bruxa").
       getOrCreate()
 
-    logger.info("Spark session started")
     import spark.implicits._
-
-
-
-    import org.apache.spark.sql.functions.udf
-
-    def getSrc: DBLPEdge => Long = _.srcId
-
-    val upperUDF = udf(getSrc)
 
     val sc = spark.sparkContext
     val dblpDF = spark.read.json(datafile).as[DBLPEntry]
@@ -81,12 +68,9 @@ object Bruxa {
       collect()
 
     val edgesRDD = sc.parallelize(edgeArray)
-
     val graph = Graph.fromEdges(edgesRDD, 1L)
-
     val vertices = graph.vertices.map(_._1).collect()
-
-    var res = ShortestPaths.run(graph, vertices)
+    val res = ShortestPaths.run(graph, vertices)
 
     res.edges.toDF().show(false)
   }
