@@ -3,7 +3,6 @@
   */
 
 import com.typesafe.config.ConfigFactory
-import com.typesafe.scalalogging.Logger
 import org.apache.spark.graphx.lib.ShortestPaths
 import org.apache.spark.graphx.{Edge, Graph}
 import org.apache.spark.sql.SparkSession
