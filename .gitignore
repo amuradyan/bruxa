@@ -5,6 +5,7 @@
 build
 gradle/
 *.log
+*.zip
 UserManagement/src/main/java/
 UserManagement/src/main/scala/other/
 data/

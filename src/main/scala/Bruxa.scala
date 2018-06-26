@@ -23,7 +23,8 @@ class Bruxa
 
 object Bruxa {
   private val conf = ConfigFactory.load()
-  private val datafile = conf.getString("app.datafile")
+  private val datafile = conf.getString("app.input")
+  private val out = conf.getString("app.output")
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder.
@@ -49,7 +50,10 @@ object Bruxa {
           split(", ")
 
         if (edges.length > 1) {
-          val combinations = edges.combinations(2).map { case Array(a, b) => (a, b) }.toList
+
+          val combinations = edges combinations (2) map {
+            case Array(a, b) => (a, b)
+          } toList
 
           combinations foreach {
             c => {
@@ -71,6 +75,9 @@ object Bruxa {
     val vertices = graph.vertices.map(_._1).collect()
     val res = ShortestPaths.run(graph, vertices)
 
-    res.edges.toDF().show(false)
+    val spEdgesDF = res.edges.toDF()
+
+    spEdgesDF.show(false)
+    spEdgesDF.write.csv(out)
   }
 }
